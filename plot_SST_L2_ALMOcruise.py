@@ -31,7 +31,7 @@ valex = 999
 cmapsst = plt.cm.RdYlBu_r
 
 # Compute min and max values 
-sstmin, sstmax = 16., 20.5
+sstmin, sstmax = 16.5, 20.5
 normsst = colors.Normalize(vmin=sstmin, vmax=sstmax)
 boundsst = np.arange(sstmin, sstmax + .1, 1.0)
 
@@ -71,6 +71,7 @@ for f in range(0, nfiles):
     sstpcm = m.pcolormesh(x, y, sst, cmap=cmapsst, norm=normsst)
     sstscat = m.scatter(lonvessel, latvessel, 15, c=tempvessel,
                         cmap=cmapsst, norm=normsst, edgecolor='None')
+    plt.plot(lonvessel, latvessel, 'ko', markersize=1)
 
     cbar = fig.colorbar(sstpcm, cmap=cmapsst, norm=normsst, orientation='vertical', pad=0.025,
                         aspect=15, shrink=1, extend='both')

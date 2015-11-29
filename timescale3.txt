@@ -1,4 +1,5 @@
-Molecular processes,0,0.,2.,1.5
-Capillary waves,0.75,1,1.,0.5
-Vertical turbulent mixing,2.25,1.5,2.,1.5
-Surface gravity waves,3.5,1.5,1.5,0.5
+Internal tides,3,1,2,1
+Surface tides,4.5,1,1.5,1
+Mesoscale  ,2,2.5,2,1.5
+Front eddies,3,2.5,1,1.25
+Internal waves,1,0.5,1.,0.5

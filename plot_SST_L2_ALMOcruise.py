@@ -16,11 +16,11 @@ from alborex_functions import *
 # File and directory names
 
 dlon, dlat = 1.0, 1.0
-coordinates = np.array((-3, 1.5, 35., 39.))
+coordinates = np.array((-5, 0., 35., 39.))
 res = 'i'
 
-datadir = "/home/ctroupin/DataOceano/Satellite/SST/ALMOcruise201511/"
-figdir = '/home/ctroupin/DataOceano/Satellite/SST/ALMOcruise201511/figures/'
+datadir = '/data_local/Satellite/MODIS/data/L2/ALMO/'
+figdir = '/data_local/Satellite/MODIS/data/L2/ALMO/figures/'
 vesselfile = 'http://thredds.socib.es/thredds/dodsC/research_vessel/thermosalinometer/socib_rv-scb_tsl001/L1/2015/11/dep0026_socib-rv_scb-tsl001_L1_2015-11-26.nc'
 
 sstfilelist = sorted(glob.glob(datadir + '*nc'))
@@ -87,7 +87,7 @@ for f in range(0, nfiles):
 
     plt.title(ssttime[:10], fontsize=20)
 
-    plt.savefig(figdir+figname, dpi=300, facecolor='w', edgecolor='w',
+    plt.savefig(figdir+figname+'_b', dpi=300, facecolor='w', edgecolor='w',
                 transparent=False, bbox_inches='tight', pad_inches=0.1)
 
 #    plt.show()

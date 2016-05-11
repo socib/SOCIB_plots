@@ -1,5 +1,0 @@
-Internal tides,3,1,2,1
-Surface tides,4.5,1,1.5,1
-Mesoscale  ,2,2.5,2,1.5
-Front eddies,3,2.5,1,1.25
-Internal waves,1,0.5,1.,0.5

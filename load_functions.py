@@ -11,7 +11,15 @@ from matplotlib.path import Path
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib._png import read_png
 
-
+def read_profiler_data(datafile):
+    with netCDF4.Dataset(datafile) as nc:
+        lon = nc.variables['LON'][:]
+        lat = nc.variables['LAT'][:]
+        time = nc.variables['time'][:]
+        depth = nc.variables['DEPTH'][:]
+        temp = nc.variables['WTR_TEM'][:]
+        psal = nc.variables['SALT_ADJUSTED'][:]
+    return lon, lat, depth, time, temp, psal
 
 def load_glider_position(filename):
     with netcdf.netCDF4(filename) as nc:

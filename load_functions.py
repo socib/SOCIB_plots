@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 import numpy as np
 import netCDF4 
@@ -22,10 +20,34 @@ def read_profiler_data(datafile):
     return lon, lat, depth, time, temp, psal
 
 def load_glider_position(filename):
-    with netcdf.netCDF4(filename) as nc:
+    with netCDF4.Dataset(filename) as nc:
         lon = nc.variables['longitude'][:]
         lat = nc.variables['latitude'][:]
     return lon, lat
+
+def load_glider_TS(filename):
+    with netCDF4.Dataset(filename) as nc:
+	psal = nc.variables['salinity'][:]
+	temp = nc.variables['temperature'][:]
+    return temp, psal
+
+def load_profiler_TS(filename):
+    f = cf.read(filename)
+    temp = f.select('sea_water_temperature')[1]
+    psal = f.select('sea_water_salinity')[1]
+    f.close()
+    return temp.array, psal.array
+
+def load_profiler_data(filename):
+    f = cf.read(filename)
+    temp = f.select('sea_water_temperature')[1]
+    psal = f.select('sea_water_salinity')[1]
+    depth = temp.coord('depth')
+    time = temp.coord('time')
+    lon = temp.coord('longitude')
+    lat = temp.coord('latitude')
+    f.close()
+    return lon, lat, depth, time, temp.array, psal.array
 
 def load_sst_modis(filename): 
     

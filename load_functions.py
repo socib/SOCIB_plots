@@ -38,6 +38,15 @@ def load_profiler_TS(filename):
     f.close()
     return temp.array, psal.array
 
+def load_salinity_L4_SMOS(filename):
+    with netCDF4.Dataset(filename) as nc:
+        lon = nc.variables['lon'][:]
+        lat = nc.variables['lat'][:]
+        psal = nc.variables['l4_sss'][:].squeeze()
+    return lon, lat, psal
+
+
+
 def load_profiler_data(filename):
     f = cf.read(filename)
     temp = f.select('sea_water_temperature')[1]

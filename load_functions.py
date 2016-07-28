@@ -31,6 +31,14 @@ def load_glider_TS(filename):
 	temp = nc.variables['temperature'][:]
     return temp, psal
 
+def load_turtle_coord(filename):
+    with netCDF4.Dataset(filename) as nc:
+        lon = nc.variables['LON'][:]
+        lat = nc.variables['LAT'][:]
+        lonQC = nc.variables['QC_LON'][:]
+        latQC = nc.variables['QC_LAT'][:]
+	return lon[lonQC == 1], lat[latQC == 1]
+
 def load_profiler_TS(filename):
     f = cf.read(filename)
     temp = f.select('sea_water_temperature')[1]
@@ -67,7 +75,7 @@ def load_sst_modis(filename):
         var2load = 'sst'
         varqc2load = 'qual_sst'
 
-    with netcdf.netCDF4(filename) as nc:
+    with netCDF4.Dataset(filename) as nc:
         lon = nc.groups['navigation_data'].variables['longitude'][:]
         lat = nc.groups['navigation_data'].variables['latitude'][:]
         sst = nc.groups['geophysical_data'].variables[var2load][:]
@@ -77,8 +85,8 @@ def load_sst_modis(filename):
         sst = np.ma.masked_where(qualsst > 1, sst)
     return lon, lat, sst
 
-def load_altimetry_aviso(altimetryfile, coordinates):
-    with netcdf.netCDF4(altimetryfile) as nc:
+def load_altimetry_aviso_uv(altimetryfile, coordinates):
+    with netCDF4.Dataset(altimetryfile) as nc:
         lon = nc.variables['lon'][:] - 360.
         lat = nc.variables['lat'][:]
         u = np.squeeze(nc.variables['u'][:])
@@ -94,3 +102,16 @@ def load_altimetry_aviso(altimetryfile, coordinates):
         v = v[:, goodlon]
     return lon, lat, u, v
 
+def load_altimetry_aviso_adt(altimetryfile, coordinates):
+    with netCDF4.Dataset(altimetryfile) as nc:
+        lon = nc.variables['lon'][:] - 360.
+        lat = nc.variables['lat'][:]
+        adt = nc.variables['adt'][:].squeeze()
+	# subset
+        goodlon = np.where(np.logical_and((lon >= coordinates[0]), (lon <= coordinates[1])))[0]
+        goodlat = np.where(np.logical_and((lat >= coordinates[2]), (lat <= coordinates[3])))[0]
+        lon = lon[goodlon]
+        lat = lat[goodlat]
+        adt = adt[goodlat, :]
+        adt = adt[:, goodlon]
+    return lon, lat, adt

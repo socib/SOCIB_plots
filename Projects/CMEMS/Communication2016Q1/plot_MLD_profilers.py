@@ -105,7 +105,7 @@ def compute_mld_profile(pressure, temperature, salinity):
     if np.ma.isMaskedArray(pressure):
         pressure = pressure.compressed()
         MLD, idx_mld = oceans.ocfis.mld(salinity[:len(pressure)], temperature[:len(pressure)], 
-                                    pressure, criterion='temperature')
+                                    pressure, criterion='density')
     else:
         MLD, idx_mld = oceans.ocfis.mld(salinity, temperature, 
                                     pressure, criterion='density')
@@ -123,7 +123,7 @@ def make_mld_plot(lon, lat, mld, figname, figtitle, **kwargs):
     cbar = plt.colorbar(extend='max', shrink=0.55)
     cbar.solids.set(alpha=1)
     cbar.set_label('MLD\n(m)', rotation=0, ha='left')
-    cbar.set_ticks(range(0, 151, 25))
+    cbar.set_ticks(range(0, 251, 50))
     m.fillcontinents(color='grey', zorder=3)
     # m.drawcoastlines(linewidth=0.25, zorder=4)
     # plt.show()
@@ -137,11 +137,11 @@ def make_mld_hist(mld, figname):
     mld = np.array(mld)
     mld = np.ma.masked_where(np.isnan(mld), mld)
     
-    bins = np.linspace(0., 150., 16.)
+    bins = np.linspace(0., 250., 26.)
     # bins = np.append(bins, (500, 750))
     plt.figure(figsize=(10,8))
     ax = plt.gca()
-    plt.hist(mld, range=(0, 150.), bins=bins, 
+    plt.hist(mld, range=(0, 250.), bins=bins, 
              histtype='stepfilled', orientation="horizontal", color='k', 
              )
     plt.xlabel('Profile frequency')
@@ -159,7 +159,7 @@ def make_mld_hist(mld, figname):
 def main():
 
     # logger = configure_log()
-    period = '201605'
+    period = '201601'
     figdir = "/home/ctroupin/Projects2/201501_InsTAC/Graphical_Material/2016_Q2/MLD"
     datadir = "/data_local/DataOceano/CMEMS/INSITU_GLO_NRT_OBSERVATIONS_013_030/monthly/profiler-glider/" + period
     
@@ -214,8 +214,8 @@ def main():
                     
     plt.style.use('../../../stylefiles/socib.mplstyle')
     logger.info('Creating scatter plot')                
-    make_mld_plot(lon_all, lat_all, mld_all, os.path.join(figdir, 'MLD_scatter_' + period), 'May 2016',
-                  vmin=5, vmax=150., cmap=cmocean.cm.density)
+    make_mld_plot(lon_all, lat_all, mld_all, os.path.join(figdir, 'MLD_scatter_' + period), 'January 2016',
+                  vmin=5, vmax=250., cmap=cmocean.cm.density)
     
     logger.info('Histogram') 
     make_mld_hist(mld_all, os.path.join(figdir, 'MLD_histogram' + period))

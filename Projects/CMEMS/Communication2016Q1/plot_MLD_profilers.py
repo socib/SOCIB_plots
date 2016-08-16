@@ -1,10 +1,9 @@
 #!/usr/bin/python
-# coding: utf-8
 
 # The goal is to compute and represent the Mixed Layer Depth (MLD) from the profiles acquired by the Argo profilers.<br>
 # To do so, we will use the [python-oceans](https://github.com/pyoceans/python-oceans) packages, which has a function to compute the MLD.
 
-# In[1]:
+# In[9]:
 
 import numpy as np
 import netCDF4
@@ -24,7 +23,7 @@ oceans.__version__
 
 # ## Logging
 
-# In[2]:
+# In[10]:
 
 def configure_log():
     logdir = './log/'
@@ -52,7 +51,7 @@ def configure_log():
 
 # # Functions to read and plot
 
-# In[3]:
+# In[11]:
 
 def read_pressure_profiles(datafiles):
     '''
@@ -87,7 +86,7 @@ def read_pressure_profiles(datafiles):
     return lon, lat, abs(pressure), temp, psal
 
 
-# In[4]:
+# In[12]:
 
 def apply_qc_variables(temp, temp_qc, psal, psal_qc):
     '''
@@ -99,20 +98,20 @@ def apply_qc_variables(temp, temp_qc, psal, psal_qc):
     return temp, psal
 
 
-# In[5]:
+# In[13]:
 
 def compute_mld_profile(pressure, temperature, salinity):
     if np.ma.isMaskedArray(pressure):
         pressure = pressure.compressed()
         MLD, idx_mld = oceans.ocfis.mld(salinity[:len(pressure)], temperature[:len(pressure)], 
-                                    pressure, criterion='density')
+                                    pressure, criterion='temperature')
     else:
         MLD, idx_mld = oceans.ocfis.mld(salinity, temperature, 
                                     pressure, criterion='density')
     return MLD
 
 
-# In[6]:
+# In[14]:
 
 def make_mld_plot(lon, lat, mld, figname, figtitle, **kwargs):
     m = Basemap(projection='robin', lon_0=0, resolution='c')
@@ -121,9 +120,9 @@ def make_mld_plot(lon, lat, mld, figname, figtitle, **kwargs):
     plt.title(figtitle)
     scat = plt.scatter(lon, lat, s=5, c=mld, edgecolor='None', alpha=0.75, **kwargs)
     cbar = plt.colorbar(extend='max', shrink=0.55)
-    cbar.solids.set(alpha=1)
     cbar.set_label('MLD\n(m)', rotation=0, ha='left')
-    cbar.set_ticks(range(0, 251, 50))
+    cbar.solids.set(alpha=1)
+    cbar.set_ticks(range(0, 151, 25))
     m.fillcontinents(color='grey', zorder=3)
     # m.drawcoastlines(linewidth=0.25, zorder=4)
     # plt.show()
@@ -131,17 +130,17 @@ def make_mld_plot(lon, lat, mld, figname, figtitle, **kwargs):
     plt.close()
 
 
-# In[7]:
+# In[15]:
 
 def make_mld_hist(mld, figname):
     mld = np.array(mld)
     mld = np.ma.masked_where(np.isnan(mld), mld)
     
-    bins = np.linspace(0., 250., 26.)
+    bins = np.linspace(0., 150., 16.)
     # bins = np.append(bins, (500, 750))
     plt.figure(figsize=(10,8))
     ax = plt.gca()
-    plt.hist(mld, range=(0, 250.), bins=bins, 
+    plt.hist(mld, range=(0, 150.), bins=bins, 
              histtype='stepfilled', orientation="horizontal", color='k', 
              )
     plt.xlabel('Profile frequency')
@@ -154,18 +153,23 @@ def make_mld_hist(mld, figname):
 
 # # Main loop
 
-# In[10]:
+# In[30]:
 
 def main():
 
-    # logger = configure_log()
-    period = '201601'
+    logger = configure_log()
+    period = '201607'
     figdir = "/home/ctroupin/Projects2/201501_InsTAC/Graphical_Material/2016_Q2/MLD"
     datadir = "/data_local/DataOceano/CMEMS/INSITU_GLO_NRT_OBSERVATIONS_013_030/monthly/profiler-glider/" + period
+    outputdir = "/home/ctroupin/Projects2/201501_InsTAC/Graphical_Material/2016_Q2/files/" 
     
     if not(os.path.exists(figdir)):
         os.mkdir(figdir)
         logger.debug('Create figure directory')
+        
+    if not(os.path.exists(outputdir)):
+        os.mkdir(outputdir)
+        logger.debug('Create output directory')
 
     datafilelist = sorted(glob.glob(os.path.join(datadir, '*.nc')))
     nfiles = len(datafilelist)
@@ -214,14 +218,19 @@ def main():
                     
     plt.style.use('../../../stylefiles/socib.mplstyle')
     logger.info('Creating scatter plot')                
-    make_mld_plot(lon_all, lat_all, mld_all, os.path.join(figdir, 'MLD_scatter_' + period), 'January 2016',
-                  vmin=5, vmax=250., cmap=cmocean.cm.density)
+    #make_mld_plot(lon_all, lat_all, mld_all, os.path.join(figdir, 'MLD_scatter_' + period), 'January 2016',
+    #              vmin=5, vmax=150., cmap=cmocean.cm.density)
+    
+    np.savetxt(os.path.join(outputdir, 'MLD_' + period + '.dat'), 
+               np.vstack((np.array(lon_all), np.array(lat_all), np.array(mld_all))).T,
+               fmt='%.4f %.4f %.2f'
+              )
     
     logger.info('Histogram') 
-    make_mld_hist(mld_all, os.path.join(figdir, 'MLD_histogram' + period))
+#    make_mld_hist(mld_all, os.path.join(figdir, 'MLD_histogram' + period))
 
 
-# In[11]:
+# In[31]:
 
 if __name__ == '__main__':
     logger = configure_log()

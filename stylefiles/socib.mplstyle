@@ -1,10 +1,10 @@
-font.size      : 18
-axes.titlesize : 30
-axes.labelsize : 20
+font.size      : 14
+axes.titlesize : 24
+axes.labelsize : 16
 lines.linewidth : 2
 lines.markersize : 7
-xtick.labelsize : 20
-ytick.labelsize : 20
+xtick.labelsize : 16
+ytick.labelsize : 16
 xtick.color : black 
 ytick.color : black
 lines.color : black
@@ -20,4 +20,4 @@ text.color       :   black
 figure.figsize   :   12, 8
 figure.dpi       :   300
 figure.edgecolor :   white
-savefig.dpi      : 300
+savefig.dpi      :   300

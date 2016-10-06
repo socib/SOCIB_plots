@@ -63,9 +63,6 @@ gliderfile1 = 'http://thredds.priv.socib.es/thredds/dodsC/auv/glider/ideep00-ime
 gliderfile2 = 'http://thredds.priv.socib.es/thredds/dodsC/auv/glider/icoast00-ime_slcost000/L2/2014/dep0005_icoast00_ime-slcost000_L2_2014-05-25_data_dt.nc'
 
 sstdir = '/data_local/Satellite/MODIS/data/L2/Alborex/SST/NetCDF/'
-# altimetryfile = '/home/ctroupin/DataOceano/AVISO/netcdf_gridded/Alborex/dt_med_allsat_madt_uv_20140516_20141010.nc'
-
-# sstdir = '/home/ctroupin/DataOceano/Satellite/SST/OceanColor/NetCDF/'
 altimetryfile = '/home/ctroupin/DataOceano/AVISO/MedSea/Aviso_gridded/Alborex/dt_med_allsat_madt_uv_20140523_20141010.nc'
 
 figdir = '/home/ctroupin/Publis/201502_Alborex/figures/MainFigure/'
@@ -273,9 +270,9 @@ for f in range(0, nfiles):
 
         mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="0.5")
 
-    plt.savefig(figdir + figname, dpi=300, facecolor='w', edgecolor='w',
+    plt.savefig(os.path.join(figdir, figname), dpi=300, facecolor='w', edgecolor='w',
                 transparent=False, bbox_inches='tight', pad_inches=0.1)
-    plt.savefig(figdir + figname + 'eps', dpi=300, facecolor='w', edgecolor='w',
+    plt.savefig(os.path.join(figdir, figname + '.eps'), dpi=300, facecolor='w', edgecolor='w',
                 transparent=False, bbox_inches='tight', pad_inches=0.1)
 
     # plt.show()

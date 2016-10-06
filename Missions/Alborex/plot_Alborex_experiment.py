@@ -1,5 +1,8 @@
 #!/usr/bin/python
-# -------------------------------------------------------------------------
+'''
+Code to create the main figure of the Alborex experiment
+Show the SST, geostrophic velocities and the location of the deployments.
+'''
 
 import os
 import glob
@@ -22,7 +25,7 @@ import pysocibclient
 doplotsst, doplotvectors, doplotstream, doplotdrifters, doplotinset = 1, 0, 1, 1, 1
 
 def configure_logging():
-    logger = logging.getLogger("alborx_logger")
+    logger = logging.getLogger("alborex_logger")
     logger.setLevel(logging.DEBUG)
     # Format for our loglines
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -40,7 +43,6 @@ def configure_logging():
 
 logger = configure_logging()
 
-
 # Regions of interest and box for the experiment
 dlon, dlat = 1.0, 1.0
 coordinates = np.array((-6.75, 3.001, 34.75, 40.))
@@ -50,7 +52,6 @@ coordinates3 = np.array((-6, -5.25, 35.8, 36.2))
 res = 'h'
 
 # Files and directories
-# coastdir = '/home/ctroupin/IMEDEA/Cartex2014/data/coastline/'
 coastdir = '/home/ctroupin/Publis/201502_Alborex/data/coastline/'
 coastfile = 'coastline_cartex.dat'
 coastfile = 'coastline_cartex_f3.txt'
@@ -101,24 +102,21 @@ loncoast, latcoast = alborex_load_coast_gshhs(coastdir + coastfile, coordinates,
 #
 # Load CTD and glider profiles
 lonCTD, latCTD, depthCTD, tempCTD, sstCTD = alborex_load_ctd(ctdfile)
-print "Loading CTD data"
-print "..."
+logger.info("Loading CTD data")
 
 longlider1, latglider1, depthglider1 = alborex_loadglider_coord(gliderfile1)
-print "Loading deep glider data"
-print "..."
+logger.info("Loading deep glider data")
+
 longlider2, latglider2, depthglider1 = alborex_loadglider_coord(gliderfile2)
-print "Loading coastal glider data"
-print "..."
+logger.info("Loading coastal glider data")
+
 
 # Generate lists of platforms
 if doplotdrifters:
     socib_api = pysocibclient.ApiClient()
     drifterlist = socib_api.list_platforms(init_datetime=time_init, end_datetime=time_end,
                                            instrument_type="surface_drifter")
-
-    print "Generating list of drifter files"
-    print "..."
+    logger.info("Generating list of drifter files)
 
 fig, m, ax = prepare_map(coordinates, res)
 loncoast2, latcoast2 = m(loncoast, latcoast)
@@ -220,9 +218,9 @@ for f in range(0, nfiles):
                     londriftertotal += londrifter[0]
                     latdriftertotal += latdrifter[0]
                     ndrifters += 1
-        # add_logo_on_map(driferlogo, ax, [londriftertotal / ndrifters, latdriftertotal / ndrifters], 0.1, zorder=6)
+        add_logo_on_map(driferlogo, ax, [londriftertotal / ndrifters, latdriftertotal / ndrifters], 0.1, zorder=6)
 
-    # Add rectangle for experiment
+    logger.info("Add rectangle for experiment")
     patch = create_rect_patch(coordinates2, m, 0.1)
     ax.add_patch(patch)
     # and for Gibraltar

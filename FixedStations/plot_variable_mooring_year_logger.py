@@ -152,35 +152,50 @@ def main():
     Generate the file list
     probably a more clever way to do it, but there are several deployments
     for each of the platform and so the names have changed.
-    Use an API would be better
+    Using new API would be better
     '''
 
     file_basename = "http://thredds.socib.es/thredds/dodsC/mooring/conductivity_and_temperature_recorder/"
-    file_list = ['buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-06.nc',
-                 'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-07.nc',
-		 'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-08.nc',
-		 'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-09.nc',
-                 'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-06.nc',
-                 'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-07.nc',
-                 'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-08.nc',
-                 'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-09.nc',
-		 'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-06.nc',
-                 'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-07.nc',
-                 'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-08.nc',
-		 'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-09.nc']
+    # file_list = ['buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-06.nc',
+    #              'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-07.nc',
+	# 	         'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-08.nc',
+	# 	         'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-09.nc',
+    #              'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-06.nc',
+    #              'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-07.nc',
+    #              'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-08.nc',
+    #              'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-09.nc',
+	# 	         'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-06.nc',
+    #              'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-07.nc',
+    #              'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-08.nc',
+	# 	         'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-09.nc']
+
+    file_list = ['buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-10.nc',
+                 'buoy_bahiadepalma-scb_sbe37005/L1/2014/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2014-11.nc',
+                 'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-10.nc',
+                 'buoy_bahiadepalma-scb_sbe37005/L1/2015/dep0002_buoy-bahiadepalma_scb-sbe37005_L1_2015-11.nc',
+                 'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-10.nc',
+		         'buoy_bahiadepalma-scb_sbe37007/L1/2016/dep0001_buoy-bahiadepalma_scb-sbe37007_L1_2016-11.nc']
+
     file_list = [file_basename + s for s in file_list]
 
-    file_list2 = ['buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-07.nc',
-                  'buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-08.nc',
-		  'buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-09.nc',
-                  'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-06.nc',
-                  'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-07.nc',
-                  'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-08.nc',
-		  'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-09.nc',
-                  'buoy_canaldeibiza-scb_sbe37006/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2016-06.nc',
-                  'buoy_canaldeibiza-scb_sbe37006/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2016-07.nc',
-                  'buoy_canaldeibiza-scb_sbe37005/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37005_L1_2016-08.nc',
-		  'buoy_canaldeibiza-scb_sbe37005/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37005_L1_2016-09.nc']
+    # file_list2 = ['buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-07.nc',
+    #               'buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-08.nc',
+	# 	          'buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-09.nc',
+    #               'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-06.nc',
+    #               'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-07.nc',
+    #               'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-08.nc',
+	# 	          'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-09.nc',
+    #               'buoy_canaldeibiza-scb_sbe37006/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2016-06.nc',
+    #               'buoy_canaldeibiza-scb_sbe37006/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2016-07.nc',
+    #               'buoy_canaldeibiza-scb_sbe37005/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37005_L1_2016-08.nc',
+	# 	          'buoy_canaldeibiza-scb_sbe37005/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37005_L1_2016-09.nc']
+
+    file_list2 = ['buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-10.nc',
+                  'buoy_canaldeibiza-scb_sbe37006/L1/2014/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2014-11.nc',
+                  'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-10.nc',
+                  'buoy_canaldeibiza-scb_sbe37006/L1/2015/dep0003_buoy-canaldeibiza_scb-sbe37006_L1_2015-11.nc',
+                  'buoy_canaldeibiza-scb_sbe37005/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37005_L1_2016-10.nc',
+		          'buoy_canaldeibiza-scb_sbe37005/L1/2016/dep0003_buoy-canaldeibiza_scb-sbe37005_L1_2016-11.nc']
 
     file_list2 = [file_basename + s for s in file_list2]
 

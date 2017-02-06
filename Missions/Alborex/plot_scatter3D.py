@@ -10,8 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from alborex_functions import *
 import logging
 
-plottemp, plotsalinity, plotchloro = 1, 0, 0
-
+plottemp, plotsalinity, plotchloro = 0, 1, 0
 
 def configure_logging():
     logger = logging.getLogger("alborex_3Dscatter_logger")
@@ -30,7 +29,6 @@ def configure_logging():
     logger.addHandler(fh)
     return logger
 
-
 logger = configure_logging()
 
 # Plot configuration
@@ -42,6 +40,7 @@ res = 'i'
 
 # Files and directories
 coastdir = '/home/ctroupin/IMEDEA/Cartex2014/data/coastline/'
+coastdir = '/home/ctroupin/IMEDEA/Alborex/data/coastline/'
 coastfile = 'coastline_cartex_f.txt'
 ctdfile = ('http://thredds.priv.socib.es/thredds/dodsC/research_vessel/ctd/',
            'socib_rv-scb_sbe9002/L1/2014/dep0007_socib-rv_scb-sbe9002_L1_2014-05-25.nc')
@@ -62,8 +61,10 @@ else:
 
 
 figdir = '/home/ctroupin/public_html/Alborex/figures_20161006/'
+figdir = '/home/ctroupin/IMEDEA/Alborex/figures/201610/'
 figname1 = 'alborex_temperature'
 figname2 = 'alborex_chloro'
+figname3 = 'alborex_psal'
 
 valex = 999
 cmap = plt.cm.YlGnBu
@@ -88,7 +89,7 @@ logger.info('Loading coast')
 loncoast, latcoast = alborex_load_coast(coastdir, coastfile, valex)
 
 logger.info('Loading CTD data')
-lonCTD, latCTD, depthCTD, tempCTD, chloroCTD = alborex_load_ctd(ctdfile)
+# lonCTD, latCTD, depthCTD, tempCTD, chloroCTD = alborex_load_ctd(ctdfile)
 
 logger.info('Loading coordinates and temperature data from gliders (with sub-sampling)')
 NN = 5
@@ -126,7 +127,7 @@ if plottemp == 1:
     fig.patch.set_facecolor('white')
 
     logger.info("Plot the CTD profiles")
-    ndepth = depthCTD.shape[1]
+    # ndepth = depthCTD.shape[1]
     for p in range(0, 20):
         scat3D = ax.scatter(lonCTD[p] * np.ones(ndepth), latCTD[p] * np.ones(ndepth),
                             -depthCTD[p, :], s=10, c=tempCTD[p, :], marker='o',
@@ -242,7 +243,7 @@ if plottemp == 1:
 
 if plotsalinity:
 
-    depthCTD = np.ma.masked_outside(depthCTD, depthmax, abs(depthmin))
+    # depthCTD = np.ma.masked_outside(depthCTD, depthmax, abs(depthmin))
     depthglider1 = np.ma.masked_outside(depthglider1, depthmax, abs(depthmin))
     depthglider2 = np.ma.masked_outside(depthglider2, depthmax, abs(depthmin))
 
@@ -250,12 +251,13 @@ if plotsalinity:
     ax = fig.gca(projection='3d')
     fig.patch.set_facecolor('white')
 
+    '''
     # Plot the CTD profiles
     ndepth = depthCTD.shape[1]
     for p in range(0, len(lonCTD)):
         scat3D = ax.scatter(lonCTD[p] * np.ones(ndepth), latCTD[p] * np.ones(ndepth), -depthCTD[p, :], s=15,
                             c=psalCTD[p, :], edgecolor='None', norm=normchloro, alpha=1, cmap=cmapCTDpsal, zorder=4)
-
+    '''
     ##    # Plot the glider profiles
     scat3Dglider1 = ax.scatter(longlider1, latglider1, -depthglider1, s=5, c=chloroglider1, edgecolor='None',
                                norm=normCTDpsal, cmap=cmapCTDpsal, zorder=4)
@@ -272,7 +274,7 @@ if plotsalinity:
     #    ##    ax.text(lonCTD[p],latCTD[p],15.,str(p),ha='center',zorder=6,bbox=props)
     #
     # Add the colorbar
-    cbar = fig.colorbar(scat3D, cmap=cmapCTDpsal, orientation='vertical', pad=0.05, aspect=15, shrink=0.8, norm=normCTDpsal,
+    cbar = fig.colorbar(scat3Dglider1, cmap=cmapCTDpsal, orientation='vertical', pad=0.05, aspect=15, shrink=0.8, norm=normCTDpsal,
                         extend='both')
     cbar.set_clim(psalCTDmin, psalCTDmax)
     boundsCTDchloro = np.array((0.01, 0.03, 0.1, 0.3, 1.0))
@@ -287,7 +289,7 @@ if plotsalinity:
     # Change wall properties
     change_wall_prop(ax, coordinates, depths, angles)
 
-    plt.savefig(figdir + figname2 + '_gliderCTD', dpi=300, facecolor='w', edgecolor='w', transparent=False,
+    plt.savefig(figdir + figname3 + '_gliderCTD', dpi=300, facecolor='w', edgecolor='w', transparent=False,
                 bbox_inches='tight', pad_inches=0.1)
     # plt.show()
     plt.close()
@@ -301,7 +303,7 @@ if plotsalinity:
 
     #    # Plot the glider profiles
     scat3Dglider1 = ax.scatter(longlider1, latglider1, -depthglider1, s=5, c=salinityglider1, edgecolor='None',
-                               norm=normchloro, cmap=cmapCTDchloro, zorder=4)
+                               norm=normchloro, cmap=cmapCTDpsal, zorder=4)
 
     # Add the colorbar
     cbar = fig.colorbar(scat3D, cmap=cmap, orientation='vertical', pad=0.05, aspect=15, shrink=0.8,
@@ -320,7 +322,7 @@ if plotsalinity:
     # Change wall properties
     change_wall_prop(ax, coordinates, depths, angles)
 
-    plt.savefig(figdir + figname2 + '_glider1', dpi=300, facecolor='w', edgecolor='w', transparent=False,
+    plt.savefig(figdir + figname3 + '_glider1', dpi=300, facecolor='w', edgecolor='w', transparent=False,
                 bbox_inches='tight', pad_inches=0.1)
     # plt.show()
     plt.close()
@@ -350,7 +352,7 @@ if plotsalinity:
     # Change wall properties
     change_wall_prop(ax, coordinates, depths, angles)
 
-    plt.savefig(figdir + figname2 + '_glider2', dpi=300, facecolor='w', edgecolor='w', transparent=False,
+    plt.savefig(figdir + figname3 + '_glider2', dpi=300, facecolor='w', edgecolor='w', transparent=False,
                 bbox_inches='tight', pad_inches=0.1)
     # plt.show()
     plt.close()

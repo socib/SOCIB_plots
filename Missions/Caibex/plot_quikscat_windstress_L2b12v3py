@@ -1,0 +1,361 @@
+#!/usr/bin/env python
+#
+# 
+# Plot the wind stress obtained from QuikSCAT
+# 
+# data downloaded from ftp://podaac.jpl.nasa.gov/allData/quikscat/L2B12/v3/
+
+import os
+import glob
+import numpy as np
+import netCDF4 as netcdf
+import matplotlib.pyplot as plt
+import matplotlib.dates as dt
+from matplotlib  import colors
+import time
+from mpl_toolkits.basemap import Basemap
+from scipy import interpolate
+from windstress_tools import *
+
+doplotvel=1
+doplotcurl=1
+doplotall=1
+
+winddir = '/data_local/Satellite/Wind/QuikScat/L2/'
+figdir1='/home/ctroupin/Publis/201406_CAIBEX/figures/2015/'
+
+windbasefile = 'qs_l2b*.nc'
+windfilelist = sorted(glob.glob(winddir+windbasefile))
+nfiles = len(windfilelist)
+
+figname='windcurl_'
+figtype='.png'
+
+basemap_resolution = 'h'
+deg2km = 111125.1
+
+# define constants
+
+g = 9.8        # acceleration due to gravity [m/s^2]
+sigmaSB     = 5.6697e-8  # Stefan-Boltzmann constant [W/m^2/K^4]
+eps_air     = 0.62197    # molecular weight ratio (water/air)
+gas_const_R = 287.04     # gas constant for dry air [J/kg/K]
+CtoK        = 273.16     # conversion factor for [C] to [K]
+
+kappa          = 0.4     # von Karman's constant
+Charnock_alpha = 0.011   # Charnock constant (for determining roughness length
+R_roughness   = 0.11     # limiting roughness Reynolds # for aerodynamically
+
+                      
+# ------ defaults suitable for boundary-layer studies
+cp            = 1004.7    # heat capacity of air [J/kg/K]
+rho_air       = 1.22      # air density (when required as constant) [kg/m^2]
+Ta_default    = 10        # default air temperature [C]
+
+
+Ta=Ta_default
+
+
+#------------------------------------------------------------------------------------
+cmap=plt.cm.autumn_r
+cmap2=plt.cm.RdBu_r
+
+
+vmin = 0.02
+vmax = 0.16
+vmin2=-2e0
+vmax2=2e0
+dvar=0.02
+dvar2=0.5
+
+bounds = np.arange(vmin,vmax+0.01,dvar)
+norm = colors.Normalize(vmin=vmin,vmax=vmax+0.01)
+levels2plot = np.arange(vmin,vmax+0.001,dvar/10)
+
+bounds2 = np.arange(vmin2,vmax2+0.01*dvar2,dvar2)
+bounds2[len(bounds2)/2] = 0
+norm2 = colors.Normalize(vmin=vmin2,vmax=vmax2+0.01*dvar2)
+levels2plot2 = np.arange(vmin2,vmax2+0.01*dvar2,dvar2/10)
+
+#------------------------------------------------------------------------------------
+# Region of interest
+lonmin = -13
+lonmax = -8.9
+latmin = 29
+latmax = 33
+dlon=1
+dlat=1
+
+m = Basemap(projection='merc',llcrnrlon=lonmin,llcrnrlat=latmin+0.1,\
+                urcrnrlon=lonmax,urcrnrlat=latmax,  \
+                lat_ts=0.5*(latmin+latmax),\
+                resolution=basemap_resolution)
+
+meridians=np.arange(lonmin,lonmax,dlon)
+parallels=np.arange(latmin,latmax,dlat)
+
+# Create regular grid on which wind will be interpolated
+# ------------------------------------------------------
+
+dloninterp=0.15
+dlatinterp=0.15
+lon2interp=np.arange(lonmin-2*dloninterp,lonmax+2*dloninterp,dloninterp)
+lat2interp=np.arange(latmin-2*dlatinterp,latmax+2*dlatinterp,dlatinterp)
+llon2interp,llat2interp=np.meshgrid(lon2interp,lat2interp)
+
+# Compute metrics and Coriolis frq
+dlonx,dlony=np.gradient(llon2interp)
+dlatx,dlaty=np.gradient(llat2interp)
+dx=dlony*np.cos(np.deg2rad(llat2interp))*deg2km
+dy=dlatx*deg2km
+f=4*np.pi*np.sin(np.deg2rad(llat2interp))/86400
+
+#------------------------------------------------------------------------------------
+# Create figure directories if necessary
+if not(os.path.exists(figdir1)):
+    os.makedirs(figdir1)
+#------------------------------------------------------------------------------------
+
+# prepare time
+deltatime=(dt.datestr2num('1999,1,1')-dt.datestr2num('1970,1,1'))*86400
+
+
+# Loop on the days
+for windfile in windfilelist:
+
+    print 'Working on '+str(windfile)
+    
+    ###------------------------------------------------------------------------------------        
+    ### Compute metrics and Coriolis frq
+    ##lon,lat=np.meshgrid(lon,lat)
+    ##dlonx,dlony=np.gradient(lon)
+    ##dlatx,dlaty=np.gradient(lat)
+    ##dx=dlony*np.cos(np.deg2rad(lat))*deg2km
+    ##dy=dlatx*deg2km
+    ##f=4*np.pi*np.sin(np.deg2rad(lat))/86400
+
+    figbasename = os.path.basename(windfile)
+    figbasename = figbasename[:-3]    
+    figbasename2 = figbasename+'_curl'
+    figbasename3 = figbasename+'_stress_curl'
+
+    print figbasename
+        
+    # Load wind
+    nc=netcdf.Dataset(windfile)
+    lon = nc.variables['lon'][:]-360
+    lat = nc.variables['lat'][:]
+    windspeed = nc.variables['retrieved_wind_speed'][:]
+    winddirection = nc.variables['retrieved_wind_direction'][:]
+    windtime = nc.variables['time'][:]
+    nc.close()
+
+    lon=lon.flatten()
+    lat=lat.flatten()
+    windspeed=windspeed.flatten()
+    winddirection=winddirection.flatten()
+
+    figtime=time.gmtime(windtime[0]+deltatime)
+    figtitle=str(figtime.tm_year)+'-'+str(figtime.tm_mon)+'-'+str(figtime.tm_mday)
+    #------------------------------------------------------------------------------------
+    # Select sub-region
+    goodlon = np.nonzero(np.logical_and(lon<=lonmax+dlon,lon>=lonmin-dlon))
+    goodlon = goodlon[0]
+    
+    if goodlon.size !=0:
+        lat = lat[goodlon]
+        lon = lon[goodlon]
+        windspeed = windspeed[goodlon]
+        winddirection = -winddirection[goodlon]+90
+        goodlat = np.nonzero(np.logical_and(lat<=latmax+dlat,lat>=latmin-dlat))
+        goodlat = goodlat[0]
+        if goodlat.size !=0:
+            lat = lat[goodlat]
+            lon = lon[goodlat]
+            windspeed = windspeed[goodlat]
+            winddirection = winddirection[goodlat]
+
+            uwind=windspeed*np.cos(np.deg2rad(winddirection))
+            vwind=windspeed*np.sin(np.deg2rad(winddirection))
+            uwind=np.ma.masked_where(uwind==uwind.fill_value,uwind)
+            vwind=np.ma.masked_where(vwind==vwind.fill_value,vwind)
+
+            uwind.data[uwind.data==uwind.data.min()]=np.nan
+            vwind.data[vwind.data==vwind.data.min()]=np.nan
+            uwind.data[uwind.data==0.0]=np.nan
+            vwind.data[vwind.data==0.0]=np.nan
+            uwind=np.ma.masked_where(uwind.data==0.0,uwind)
+            vwind=np.ma.masked_where(vwind.data==0.0,vwind)
+            windnorm=np.sqrt(uwind*uwind+vwind*vwind)
+
+            # Compute wind stress from wind components
+            taux, tauy = stresstc(uwind, vwind,Ta,rho_air)
+            taunorm = np.hypot(taux,tauy)
+
+            taux*=-1.,
+            tauy*=-1.,
+
+            x0,y0=m(lon,lat)
+            x,y=m(llon2interp,llat2interp)
+            
+            #------------------------------------------------------------------------------------
+            # Plot velocity field
+            if doplotvel ==1:
+
+                
+                
+                # Make the plot
+                fig=plt.figure()
+                ax = fig.add_subplot(111)
+                m.ax=ax
+
+                #contour=m.contourf(x,y,windspeed,levels2plot,cmap=cmap,norm=norm,extend='max')
+
+                Q=m.quiver(x0,y0,taux,tauy,taunorm,\
+                           units='width',scale=1.5,width=0.003,norm=norm)
+                k = plt.quiverkey(Q, .9, 1.075, 0.1, r'$0.1\, N m^{-2}$',labelpos='S',
+                               fontproperties={'weight':'bold','size':'16'},color='k')
+
+                #m.plot(x0,y0,'r.',ms=1)
+                
+                # Add grid, coastline and continent
+                m.drawcoastlines(ax=ax)
+                m.fillcontinents(color='.15', ax=ax)
+                
+                # Add grid, coastline and continent
+                m.drawcoastlines(ax=ax,zorder=4)
+                m.fillcontinents(color='.8', ax=ax,zorder=3)
+                m.drawmeridians(meridians,labels=[0, 0, 0, 1],linewidth=0.5,fontsize=18,zorder=2)
+                m.drawparallels(parallels,labels=[1, 0, 0, 0],linewidth=0.5,fontsize=18,zorder=2)
+
+
+
+                # Add the colorbar
+                cbar=fig.colorbar(Q,orientation='vertical',pad=0.025,aspect=15,norm=norm,extend='both')
+                cbar.set_label(r'$N m^{-2}$',fontname='Times New Roman',fontsize=18)
+                cbar.set_ticks(bounds)
+                cbar.ax.set_yticklabels(bounds,fontname='Times New Roman',fontsize=16)
+
+                plt.title(figtitle,fontname='Times New Roman',fontsize=24)
+                ## Export figure and display it
+##                plt.savefig(figdir1+figbasename+figtype, dpi=300, facecolor='w', edgecolor='w',
+##                            transparent=False, bbox_inches='tight', pad_inches=0.1)
+##                #plt.show()
+##                plt.close()
+
+            # Need to reinterpolate wind on a regular grid
+            uwind_interp = interpolate.griddata((lon,lat), taux, (llon2interp,llat2interp), method='nearest',fill_value=np.nan)
+            vwind_interp = interpolate.griddata((lon,lat), tauy, (llon2interp,llat2interp), method='nearest',fill_value=np.nan)                    
+            
+            # Compute wind curl
+            dux,duy=np.gradient(uwind_interp)
+            dvx,dvy=np.gradient(vwind_interp)
+            vort=(dvy/dx-dux/dy)
+            
+            vort=np.ma.masked_where(np.logical_or(np.isnan(uwind_interp),uwind_interp==0.0),vort)
+
+               
+            if doplotcurl ==1:
+
+                
+
+                
+                # Make the plot
+                fig=plt.figure()
+                ax = fig.add_subplot(111)
+                m.ax=ax
+
+##                Q=m.quiver(x0,y0,taux,tauy,\
+##                           units='width',scale=1.5,width=0.003,norm=norm,color='g')
+##                Q2=m.quiver(x,y,uwind_interp,vwind_interp,units='width',scale=1.50,width=0.003,color='k')
+                contour2=m.contourf(x,y,vort*1e6,levels2plot2,cmap=cmap2,extend='both',norm=norm2)
+                
+##                    Q=m.quiver(x,y,uwind_interp,vwind_interp,units='width',scale=150,width=0.003,color='k')
+##                               
+##                    k = plt.quiverkey(Q, .95, 1.075, 10, r'$10\, ms^{-1}$',labelpos='S',
+##                                    fontproperties={'weight':'bold','size':'16'},color='k')
+                 
+               # Add grid, coastline and continent
+                m.drawcoastlines(ax=ax,zorder=4)
+                m.fillcontinents(color='.8', ax=ax,zorder=3)
+                m.drawmeridians(meridians,labels=[0, 0, 0, 1],linewidth=0.5,fontsize=18,zorder=2)
+                m.drawparallels(parallels,labels=[1, 0, 0, 0],linewidth=0.5,fontsize=18,zorder=2)
+
+##                m.plot(x0,y0,'k.',ms=1)
+##                m.plot(x,y,'r.',ms=1)
+         
+                # Add the colorbar
+         
+                cbar=fig.colorbar(contour2,cmap=cmap2,orientation='vertical',pad=0.025,aspect=15,norm=norm2)
+                xt,yt=m(-8.85,33.1)
+                #plt.text(xt,yt,r'$( \times 10^{4} s^{-1})$',fontsize=18)
+
+                cbar.set_label(r'$N m^{-3} \times 1e^{6}$',fontname='Times New Roman',fontsize=18)
+                cbar.set_ticks(bounds2)
+                cbar.ax.set_yticklabels(bounds2,fontname='Times New Roman',fontsize=16)
+         
+                plt.title(figtitle,fontname='Times New Roman',fontsize=24)
+                #   Export figure and display it
+                plt.savefig(figdir1+figbasename2+figtype, dpi=300, facecolor='w', edgecolor='w',
+                     transparent=False, bbox_inches='tight', pad_inches=0.1)
+                plt.show()
+                plt.close()
+
+
+            if doplotall == 1:
+                # Make the plot
+                fig=plt.figure()
+                ax = fig.add_subplot(111)
+                m.ax=ax
+
+                Q=m.quiver(x0,y0,taux,tauy,\
+                           units='width',scale=1.5,width=0.003,color='k',zorder=3)
+                k = plt.quiverkey(Q, .9, 1.075, 0.1, r'$0.1\, N m^{-2}$',labelpos='S',
+                               fontproperties={'weight':'bold','size':'16'},color='k')
+
+                contour2=m.contourf(x,y,vort*1e6,levels2plot2,cmap=cmap2,extend='both',norm=norm2,zorder=2)
+                
+                # Add grid, coastline and continent
+                m.drawcoastlines(ax=ax)
+                m.fillcontinents(color='.15', ax=ax)
+                
+                # Add grid, coastline and continent
+                m.drawcoastlines(ax=ax,zorder=4)
+                m.fillcontinents(color='.8', ax=ax,zorder=3)
+                m.drawmeridians(meridians,labels=[0, 0, 0, 1],linewidth=0.5,fontsize=18,zorder=2)
+                m.drawparallels(parallels,labels=[1, 0, 0, 0],linewidth=0.5,fontsize=18,zorder=2)
+
+            
+
+                # Add the colorbar
+                cbar=fig.colorbar(contour2,orientation='vertical',pad=0.025,aspect=15,norm=norm,extend='both')
+                cbar.set_label(r'$N m^{-3} \times 1e^{6}$',fontname='Times New Roman',fontsize=18)
+                cbar.set_ticks(bounds2)
+                cbar.ax.set_yticklabels(bounds2,fontname='Times New Roman',fontsize=16)
+
+                plt.title(figtitle,fontname='Times New Roman',fontsize=24)
+                
+                #   Export figure and display it
+                plt.savefig(figdir1+figbasename3+figtype, dpi=300, facecolor='w', edgecolor='w',
+                     transparent=False, bbox_inches='tight', pad_inches=0.1)
+                #plt.show()
+                plt.close()
+
+
+
+
+
+
+                
+        else:
+            print 'no data in your area'
+            #------------------------------------------------------------------------------------
+            # 
+
+
+
+
+
+
+    ##    
+         

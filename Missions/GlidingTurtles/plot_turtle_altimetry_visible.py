@@ -17,6 +17,7 @@ doplotsst, doplotstream, plotsalinity = 0, 1, 1
 # Regions of interest and box for the experiment
 dlon, dlat = 1.0, 1.0
 coordinates = np.array((0.5, 6.50001, 36.9, 41.))
+coordinates = np.array((-2.00, 8.001, 35.5, 42.))
 coordinates2 = np.array((-2.00, 8.001, 35.5, 42.))
 valex = -999.
 
@@ -26,7 +27,7 @@ yyyy, mm, dd = str(year), str(month).zfill(2), str(day).zfill(2)
 
 figdate = yyyy + mm + dd
 figtitle =  datetime.datetime(year, month, day).strftime("%d %B %Y")
-figname = "Turtle_Altimetry_visible"+ figdate
+figname = "Turtle_Altimetry_visible2_" + figdate
 
 romsfile = ("http://thredds.priv.socib.es/thredds/dodsC/operational_models/"
             "oceanographical/hydrodynamics/wmop/latest.nc")

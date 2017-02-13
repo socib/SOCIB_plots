@@ -177,8 +177,6 @@ def alborex_load_sst_meteofrance(sstfile, coordinates):
 
         return lon, lat, sst
 
-
-
 def alborex_load_sst_L2(sstdir, sstfile):
     if 'SST4' in sstfile:
         sstname = 'Geophysical_Data_sst4'
@@ -307,7 +305,6 @@ def alborex_loadglider_varname(gliderfile, varname, NN):
     with netcdf.Dataset(gliderfile, 'r') as nc:
         var = nc.variables[varname][::NN]
     return var
-
 
 def change_wall_prop(ax, coordinates, depths, angles):
     ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))

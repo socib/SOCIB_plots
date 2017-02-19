@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -------------------------------------------------------------------------
 
-
 from matplotlib import colors
 import datetime
 from alborex_functions import *
-
 
 doplotsst, doplotstream, plotsalinity = 0, 1, 1
 
@@ -19,13 +17,15 @@ valex = -999.
 figdate = "20150830"
 figtitle = "30 August, 2015"
 
-figname = "Turtle_Altimetry_"+ figdate
-romsfile = "http://thredds.priv.socib.es/thredds/dodsC/operational_models/oceanographical/hydrodynamics/wmop/latest.nc"
-turtlefile = "http://thredds.priv.socib.es/thredds/dodsC/animal/turtle/turtle_mel-alk_ttrk014/L1/2015/08/dep0001_turtle-mel_alk-ttrk014_L1_2015-08-12.nc"
-altimetryfile = "http://thredds.priv.socib.es/thredds/dodsC/satellite/altimetry/aviso/madt/L4/2015/08/nrt_med_allsat_madt_uv_" + figdate + "_" + figdate + ".nc.gz"
+figname = ''.join(("Turtle_Altimetry_", figdate))
+romsfile = ('http://thredds.priv.socib.es/thredds/dodsC/operational_models/'
+            'oceanographical/hydrodynamics/wmop/latest.nc')
+turtlefile = ('http://thredds.priv.socib.es/thredds/dodsC/animal/turtle/'
+              'turtle_mel-alk_ttrk014/L1/2015/08/dep0001_turtle-mel_alk-ttrk014_L1_2015-08-12.nc')
+altimetryfile = ('http://thredds.priv.socib.es/thredds/dodsC/satellite/altimetry/'
+                 'aviso/madt/L4/2015/08/nrt_med_allsat_madt_uv_{0}_{0}.nc.gz').format(figdate)
 turtlelogo = "/home/ctroupin/Presentations/figures4presentations/logo/turtle.png"
 figdir = '/home/ctroupin/Pictures/SOCIB/'
-
 
 vmin, vmax, dvar = 36.5, 38.5, 0.5
 
@@ -43,8 +43,6 @@ boundsst = np.arange(sstmin, sstmax + .001, 1.0)
 
 fig, m, ax = prepare_map(coordinates, res)
 plt.close()
-
-
 
 # Load turtle data
 with netcdf.Dataset(turtlefile) as nc:
@@ -66,7 +64,6 @@ if plotsalinity:
 
 
 fig, m, ax = prepare_map(coordinates, res)
-
 
 print figname
 # Load L2 data

@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import glob
 import matplotlib.pyplot as plt
@@ -76,7 +77,7 @@ if plotlarge:
         # print f
         file2load = f
         code, year, month, day, hour, minute, second, lat, lon, sst,\
-        u, v, lat_qc, lon_qc, sst_qc, V_QC = np.loadtxt(file2load, delimiter=',', unpack=True)
+            u, v, lat_qc, lon_qc, sst_qc, V_QC = np.loadtxt(file2load, delimiter=',', unpack=True)
 
         # Keep only good positions
         lon[lon_qc > 1] = np.nan
@@ -98,7 +99,8 @@ if plotlarge:
     m.drawmapscale(-4., 38.5, -4., 38, 200, barstyle='simple', units='km', fontsize=12, zorder=4)
 
     m.fillcontinents(ax=ax, color='w', zorder=3)
-    # plt.savefig(figdir+figname, dpi=300, facecolor='w', edgecolor='w',transparent=False, bbox_inches='tight', pad_inches=0.1)
+    # plt.savefig(os.path.join(figdir, figname), dpi=300, facecolor='w',
+    # edgecolor='w',transparent=False, bbox_inches='tight', pad_inches=0.1)
     plt.show()
     plt.close()
 
